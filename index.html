@@ -189,6 +189,22 @@
                 max-width: 800px;
                 height: auto;
             }
+
+            .video-row {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                gap: 1em;
+                flex-wrap: wrap; /* fall back to stacking on small screens */
+                margin: 1em 0;
+            }
+
+            .video-row video {
+                width: calc(50% - 0.5em); /* Two videos per row with 1em total gap */
+                max-width: 400px; /* limit individual size on large screens */
+                height: auto;
+            }
+
             
             img {
                 max-width: 100%;
@@ -419,6 +435,47 @@
                     </video> 
                 </div>
             </section> 
+
+            <h2 id="rebuttal">Rebuttal</h2>
+            <h3 id="arm-ik">Feasibility of DexMachina policies for Arm Kinematics</h3>
+                <p> Due to limited time and resources during the rebuttal period, we use a basic IK setup to qualitatively demonstrate the feasibility of extending DexMachina to consider robot arm kinematics. 
+                    In the below videos, we use our trained RL policy to produce bimanual wrist poses for a pair of dexterous hands, then use the wrist
+                    poses as targets for inverse kinematics (IK) to generate arm joint values for a Fourier GR1 humanoid robot. 
+                    Despite occasional jittering motions, we remark the learned wrist actions are generally achievable by robot arms, 
+                    and a promising direction for future is extending our RL training to full arm control, or further constrain the wrist motion range to adapt to arm-specific kinematic constraints. 
+                </p>
+                <div class="video-container">
+                    <video controls autoplay muted playsinline>
+                        <source src="assets/dexmachina-arm-ik.mp4">
+                    </video> 
+                </div>
+
+            <h3 id="randomize"> Domain Randomization during RL Training</h3>
+            <p> To address the conern regarding robustness of learned finger motions, we provide additonal experiments where we
+                randomize the physics parameters during RL training. 
+                Videos below show qualitative comparison between a policy trained without randomized physics, and another policy trained in the same setup but 
+                the object's mass is randomly varied (we add a delta mass value randomly sampled from -0.1kg to 0.5kg). 
+                We observe the policy trained with randomization (left video) learns to make more stable contact between the Inspire hand and ketchup bottle, 
+                while achieving similar object tracking accuracy as the original policy trained without randomization (right video).
+                These results suggest incorporating domain randomization during training can improve the robustness of learned behavior, to make it less brittle to changing object dynamics, 
+                and potentially facilliate sim-to-real transfer, which is a promising direction for future work.
+            </p>
+            <!-- <div class="video-container">
+                <video controls autoplay muted playsinline>
+                    <source src="assets/rebuttal-inspire-ketchup100-norand.mp4">
+                </video> 
+                <video controls autoplay muted playsinline>
+                    <source src="assets/rebuttal-inspire-ketchup100-rand-mass.mp4">
+                </video> 
+            </div> -->
+
+            <div class="video-row">
+                <video src="assets/rebuttal-inspire-ketchup100-rand-mass.mp4" controls muted loop></video>
+                <video src="assets/rebuttal-inspire-ketchup100-norand.mp4" controls muted loop></video>
+            </div>
+            
+            
+
         </div>
         
         <script>
@@ -487,17 +544,25 @@
                 });
             });
             
-            // Add click-to-copy functionality for heading links
+            // Add click functionality for heading links to update URL
             document.querySelectorAll('h2, h3').forEach(heading => {
                 heading.style.cursor = 'pointer';
                 heading.addEventListener('click', function() {
                     const id = this.getAttribute('id');
                     if (id) {
-                        const url = window.location.origin + window.location.pathname + '#' + id;
-                        navigator.clipboard.writeText(url).then(() => {
-                            // Optional: Show a brief tooltip or notification
-                            console.log('Link copied to clipboard: ' + url);
-                        });
+                        // Update the URL hash without scrolling
+                        history.pushState(null, null, '#' + id);
+                        
+                        // Optional: Also copy to clipboard
+                        const url = window.location.href;
+                        if (navigator.clipboard) {
+                            navigator.clipboard.writeText(url).then(() => {
+                                console.log('Link copied to clipboard: ' + url);
+                            }).catch(() => {
+                                // Fallback if clipboard API fails
+                                console.log('Link updated in URL bar: ' + url);
+                            });
+                        }
                     }
                 });
             });
