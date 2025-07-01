@@ -293,6 +293,9 @@
                 <a href="#abstract">Abstract</a>
                 <a href="#method">Method</a>
                 <a href="#experiments">Experiments</a>
+                <a href="#rebuttal">Rebuttal</a>
+                <a href="#arm-ik">Feasibility of Arm Kinematics</a>
+                <a href="#randomize">RL with Domain Randomization</a>
             </div>
         </nav>
         
@@ -437,7 +440,7 @@
             </section> 
 
             <h2 id="rebuttal">Rebuttal</h2>
-            <h3 id="arm-ik">Feasibility of DexMachina policies for Arm Kinematics</h3>
+            <h3 id="arm-ik">Feasibility of Arm Kinematics</h3>
                 <p> Due to limited time and resources during the rebuttal period, we use a basic IK setup to qualitatively demonstrate the feasibility of extending DexMachina to consider robot arm kinematics. 
                     In the below videos, we use our trained RL policy to produce bimanual wrist poses for a pair of dexterous hands, then use the wrist
                     poses as targets for inverse kinematics (IK) to generate arm joint values for a Fourier GR1 humanoid robot. 
@@ -450,7 +453,7 @@
                     </video> 
                 </div>
 
-            <h3 id="randomize"> Domain Randomization during RL Training</h3>
+            <h3 id="randomize"> RL with Domain Randomization</h3>
             <p> To address the conern regarding robustness of learned finger motions, we provide additonal experiments where we
                 randomize the physics parameters during RL training. 
                 Videos below show qualitative comparison between a policy trained without randomized physics, and another policy trained in the same setup but 
