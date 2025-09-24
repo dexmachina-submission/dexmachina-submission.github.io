@@ -292,8 +292,7 @@
             <div class="nav-links">
                 <a href="#abstract">Abstract</a>
                 <a href="#method">Method</a>
-                <a href="#experiments">Experiments</a>
-                <a href="#rebuttal">Rebuttal</a>
+                <a href="#experiments">Experiments</a> 
                 <a href="#arm-ik">Feasibility of Arm Kinematics</a>
                 <a href="#randomize">RL with Domain Randomization</a>
             </div>
@@ -301,17 +300,23 @@
         
         <div id="main">
             <section id="four">
+                
                 <h1>
                     DexMachina: Functional Retargeting for <br> Bimanual Dexterous Manipulation 
                 </h1>  
-                <p></p>
+                
+                <a href="https://drive.google.com/drive/folders/14bV9wv-cFfijbdTFfUlriwA-3FYffzsd?usp=sharing" style="display: block; text-align: center">Annoymized Codebase</a>
+                
                 
                 <div class="video-container">
                     <video controls autoplay muted playsinline>
                         <source src="compressed-dexmachina-teaser.mp4"> 
                     </video> 
                 </div> 
-            
+                
+                
+                
+
                 <h2 id="abstract">
                     Abstract
                 </h2> 
@@ -439,9 +444,8 @@
                 </div>
             </section> 
 
-            <h2 id="rebuttal">Rebuttal</h2>
             <h3 id="arm-ik">Feasibility of Arm Kinematics</h3>
-                <p> Due to limited time and resources during the rebuttal period, we use a basic IK setup to qualitatively demonstrate the feasibility of extending DexMachina to consider robot arm kinematics. 
+                <p> We use a basic IK setup to qualitatively demonstrate the feasibility of extending DexMachina to consider robot arm kinematics. 
                     In the below videos, we use our trained RL policy to produce bimanual wrist poses for a pair of dexterous hands, then use the wrist
                     poses as targets for inverse kinematics (IK) to generate arm joint values for a Fourier GR1 humanoid robot. 
                     Despite occasional jittering motions, we remark the learned wrist actions are generally achievable by robot arms, 
@@ -462,15 +466,7 @@
                 while achieving similar object tracking accuracy as the original policy trained without randomization (right video).
                 These results suggest incorporating domain randomization during training can improve the robustness of learned behavior, to make it less brittle to changing object dynamics, 
                 and potentially facilliate sim-to-real transfer, which is a promising direction for future work.
-            </p>
-            <!-- <div class="video-container">
-                <video controls autoplay muted playsinline>
-                    <source src="assets/rebuttal-inspire-ketchup100-norand.mp4">
-                </video> 
-                <video controls autoplay muted playsinline>
-                    <source src="assets/rebuttal-inspire-ketchup100-rand-mass.mp4">
-                </video> 
-            </div> -->
+            </p> 
 
             <div class="video-row">
                 <video src="assets/rebuttal-inspire-ketchup100-rand-mass.mp4" controls muted loop></video>
