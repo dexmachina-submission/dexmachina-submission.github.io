@@ -14,7 +14,7 @@
             gtag('js', new Date()); 
             gtag('config', 'G-W89SB0LDFH');
         </script> 
-        <meta property="og:url" content="https://project-roco.github.io" />
+        <meta property="og:url" content="https://dexmachina-submission.github.io" />
         <meta property="og:type" content="website" />
         <meta property="og:title" content="DexMachina: Functional Retargeting for Bimanual Dexterous Manipulation"/>
         <meta property="og:description" content="DexMachina: Functional Retargeting for Bimanual Dexterous Manipulation" /> 
@@ -205,6 +205,20 @@
                 height: auto;
             }
 
+            .video-row3 {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                gap: 1em;
+                flex-wrap: wrap; /* fall back to stacking on small screens */
+                margin: 1em 0;
+            }
+            .video-row3 video {
+                width: calc(33.33% - 0.66em); /* Three videos per row with 1em total gap */
+                max-width: 300px; /* limit individual size on large screens */
+                height: auto;
+            }
+
             
             img {
                 max-width: 100%;
@@ -295,6 +309,9 @@
                 <a href="#experiments">Experiments</a> 
                 <a href="#arm-ik">Feasibility of Arm Kinematics</a>
                 <a href="#randomize">RL with Domain Randomization</a>
+                <a href="#reward-weights">Reward Weights Ablation</a>
+                <a href="#curriculum-hyperparams">Curriculum Hyperparameters</a>
+                <a href="#extra-long">Extra Long Horizon</a>
             </div>
         </nav>
         
@@ -458,8 +475,7 @@
                 </div>
 
             <h3 id="randomize"> RL with Domain Randomization</h3>
-            <p> To address the conern regarding robustness of learned finger motions, we provide additonal experiments where we
-                randomize the physics parameters during RL training. 
+            <p> To address the conern regarding robustness of learned finger motions, we provide additonal experiments where we randomize the physics parameters during RL training. 
                 Videos below show qualitative comparison between a policy trained without randomized physics, and another policy trained in the same setup but 
                 the object's mass is randomly varied (we add a delta mass value randomly sampled from -0.1kg to 0.5kg). 
                 We observe the policy trained with randomization (left video) learns to make more stable contact between the Inspire hand and ketchup bottle, 
@@ -474,8 +490,81 @@
             </div>
             
             
+            <h3 id="reward-weights"> Reward Weights Ablation</h3>
 
-        </div>
+            <p> We provide additional experiments to show the effect of different reward weights on policy performance. 
+                The maximum achievable reward for both the task reward and each auxiliary reward term is always 1.0, and the task reward is always weighted with 1.0.
+                In the experiments below, we vary the weights for motion imitation, behavior cloning and contact rewards, while keeping other settings exactly the same. 
+                Each curve uses a different combination of reward weights, and we plot the task reward (which directly reflects object tracking performances) and auxiliary rewards. 
+                The sub-plot 'Episode Task Reward' plots the cumulative task reward achieved in each episode, which directly reflects the policy's object tracking performance.
+
+                Although we could not finish an exhaustive pass on all the possible weight combinations due to the limited bandwidth during this rebuttal period, we remark the overall trend that
+                the task performance is relatively robust to different auxiliary reward weights. 
+                The slight fluctuations in the Episode Task Reward curves will likely be smoothed out when averaged across multiple random seeds. 
+            </p>
+
+            <div class="image-container">
+                <img src="iclr-rebuttal-rew-weights.png" alt="DexMachina Reward Weights Ablation" style="max-width: 80%;" />
+            </div>
+
+            <h3 id="curriculum-hyperparams"> Curriculum Hyperparameters</h3>
+            <p> 
+                We provide additional experiments to test the sensitivity of our RL training to different hyperparameters in our VOC curriculm.
+                Note that the curves are plotted with a heavier width when the VOC controller gains are reduced to 0, i.e. no virtual forces are applied and the policy must take over the manipulation.
+                Again, 'Episode Task Reward' plots the cumulative task reward achieved in each episode, which directly reflects the policy's object tracking performance.
+
+            </p>
+            
+            <ol> 
+                  <li style="font-size: 0.99em; font-weight: bold;">Decay reward thresholds.</li>
+                    <p>We keep a separate deque and threshold for each reward term (i.e. task reward, contact reward, imitation reward), 
+                        and only decay the curriculum's VOC controller gains when the achieved rewards are above the given threshold. 
+                        In the below experiments, we keep the task reward threshold the same (0.6) and compare using 0.01 vs 0 for the auxiliary rewards thresholds. 
+                        We observe that, while the two cases achieve similar task reward after VOC controller gains are decayed to zero and both have a downward trend on the auxiliary rewards, 
+                        having a non-zero threshold helps the policy achieve higher auxiliary rewards, and we qualitatively see a style difference in the learned policy behaviors. 
+                        This suggests our framework offers flexibility that allows a user to adjust the policy behaviors by tuning these thresholds while not interfering with the task performance.
+                </p>
+                <img src="iclr-rebuttal-reward-thres.png" style="max-width: 80%;" />
+                
+                <li style="font-size: 0.99em; font-weight: bold;">Curriculum rewards dequeue lengths.</li>
+                    <p> We compare different deque lengths (30, 60, 90) under the same task and robot hand setting. 
+                        Intuitively, a longer deque means the moving reward average gets updated more slowly. 
+                        Hence we observe overall similar task reward outcomes, but slightly slower decay when the deque length is longer, i.e. the policy requires more iterations before transitioning
+                        to the next curriculum stage with lower VOC controller gains.
+                    </p>
+                    <img src="iclr-rebuttal-deque-length.png" alt="DexMachina Curriculum Deque Length Ablation" style="max-width: 80%;" />
+                    
+                
+                <li style="font-size: 0.99em; font-weight: bold;">VOC controller gain decay ratio.</li>
+                    <p> 
+                        In our VOC curriculum, the controller gain values (i.e. kp and kv) are drawn from a uniform distribution with decaying upper and lower bounds. 
+                        For kp, we sample (N,) different values (N is number of parallel RL environments) from where the bounds are exponentially decayed at every iteration where the rewards are above their respective thresholds.
+
+                        The sampling distribution is Uniform~[kp_lower, kp_upper], where at each decay,
+                        kp_lower = kp_lower_prev * kp_decay_factor_lower,  kp_upper = kp_upper_prev * kp_decay_factor_upper.  
+                        
+                        Therefore, different decay_factors determine different schedule of decaying ranges for the gain distributions. 
+                        In the additional experiments below, we fix kp_decay_factor_upper=0.9 and vary kp_decay_factor_lower from 0.5 to 0.8 (hence the plotted kp ranges are 'wider' vs 'narrower'), 
+                        and show that the task performance (i.e. object tracking accuracy) is relatively insensitive to different bounds. 
+                        The reward fluctuations will likely be smoothed out when averaged across multiple random seeds.
+                        
+                    </p>
+                    <img src="iclr-rebuttal-decay-ratio.png" alt="DexMachina Curriculum Decay Ratio Ablation" style="max-width: 80%;" />
+            <h3 id="extra-long"> Extra Long Horizon</h3>
+
+                    <p> We show our method can successfully handle longer-horizon tasks than our main experiments.
+                        The main experiments in the paper used human demonstrations of up to 300 time-steps, 
+                        here we extend it to up to 600 steps on the same box and mixer demonstrations. 
+                        Below we show qualitative video of the learned policies where the Allegro hand successfully completes the following human demonstration clips (we mark them as object-start-end):
+                        left: Mixer-0-500, middle: Box-30-530, right: Box-0-600.
+                    </p> 
+                    <div class="video-row3">
+                        <video src="mixer-0-500.mp4" controls muted loop></video>
+                        <video src="box-30-530.mp4" controls muted loop></video>
+                        <video src="box-0-600.mp4" controls muted loop></video>
+                    </div>
+
+        
         
         <script>
             // Navigation toggle functionality
